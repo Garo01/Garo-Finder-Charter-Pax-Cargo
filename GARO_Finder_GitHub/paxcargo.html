@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GARO Pax / Cargo Finder</title>
+<script src="am4_core.js?v=20261103b"></script>
+<style>
+:root{--bg:#05010a;--card:#0c0618;--panel:#100820;--line:#2a1050;--cyan:#22d3ee;--mag:#e879f9;--t:#e8f0ff;--m:#9b8ec4;
+--grad:linear-gradient(135deg,#22d3ee,#a855f7,#e879f9);--ok:#4ade80;--warn:#fbbf24}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--t);font-size:13px;
+background-image:radial-gradient(ellipse at 15% 0%,rgba(34,211,238,.06),transparent 45%),radial-gradient(ellipse at 90% 80%,rgba(232,121,249,.06),transparent 45%)}
+header{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#0a0414,#1a0a28)}
+.brand{display:flex;align-items:center;gap:10px}
+.brand img{height:34px;filter:drop-shadow(0 0 6px rgba(34,211,238,.35))}
+.brand h1{font-size:1rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+.brand .sub{font-size:.62rem;color:var(--m)}
+.hdr a,.hdr button{background:#1a0a30;border:1px solid var(--line);color:#fff;padding:6px 12px;border-radius:8px;text-decoration:none;font-size:.72rem;font-weight:600;cursor:pointer;margin-left:6px}
+.hdr a.grok{background:var(--grad);border:none;color:#0a0414}
+.hdr a.nav{border-color:var(--cyan);color:var(--cyan)}
+.tabs{display:flex;gap:6px;padding:8px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+.tabs button{background:transparent;border:1px solid var(--line);color:var(--m);padding:6px 16px;border-radius:999px;cursor:pointer;font-weight:700}
+.tabs button.on{background:var(--grad);color:#0a0414;border:none}
+.layout{display:grid;grid-template-columns:320px 1fr;min-height:calc(100vh - 96px)}
+@media(max-width:900px){.layout{grid-template-columns:1fr}}
+.side{border-right:1px solid var(--line);background:var(--card);padding:12px;overflow:auto}
+.side h3{font-size:.65rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 6px;font-weight:700}
+.side h3:first-child{margin-top:0}
+label.lbl{display:block;font-size:.6rem;color:var(--m);text-transform:uppercase;margin-bottom:3px}
+input,select{width:100%;background:#080414;border:1px solid var(--line);color:var(--t);padding:7px 9px;border-radius:7px;font-size:.78rem}
+input:focus,select:focus{outline:none;border-color:var(--cyan)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rel{position:relative}
+.drop{display:none;position:absolute;left:0;right:0;top:100%;z-index:60;max-height:200px;overflow:auto;background:#080414;border:1px solid var(--cyan);border-radius:8px;margin-top:2px;box-shadow:0 12px 28px #000c}
+.drop.open{display:block}
+.opt{padding:7px 9px;cursor:pointer;border-bottom:1px solid #1a1030;font-size:.72rem}
+.opt:hover{background:rgba(34,211,238,.1)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.chip{background:var(--grad);color:#0a0414;padding:3px 8px;border-radius:999px;font-size:.65rem;font-weight:700;display:inline-flex;gap:5px;align-items:center}
+.chip button{border:none;background:0;color:#0a0414;cursor:pointer;font-weight:800}
+.sel{margin-top:6px;padding:8px;background:#080414;border:1px solid #2a1860;border-radius:9px}
+.sel .name{font-weight:700;color:var(--cyan);font-size:.8rem}
+.sel .meta{font-size:.65rem;color:var(--m);margin-top:2px}
+.seg{display:flex;gap:4px;margin-bottom:6px}
+.seg button{flex:1;background:#080414;border:1px solid var(--line);color:var(--m);padding:6px;border-radius:7px;cursor:pointer;font-size:.68rem;font-weight:600}
+.seg button.on{background:var(--grad);color:#0a0414;border:none}
+.btn-max{background:#1a1040;border:1px solid var(--cyan);color:var(--cyan);padding:5px 8px;border-radius:6px;cursor:pointer;font-size:.62rem;font-weight:700;white-space:nowrap}
+.adv-toggle{margin-top:12px;background:transparent;border:1px dashed var(--line);color:var(--m);width:100%;padding:8px;border-radius:8px;cursor:pointer;font-size:.7rem}
+.adv{display:none;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.adv.open{display:block}
+.main{padding:12px;overflow:auto;display:flex;flex-direction:column;gap:10px}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+button.btn{background:var(--grad);color:#0a0414;border:none;padding:9px 16px;border-radius:9px;cursor:pointer;font-weight:800;font-size:.8rem}
+button.btn.sec{background:#1a1030;color:var(--t);border:1px solid var(--line)}
+.stats{font-size:.7rem;color:var(--m)}
+.cards{display:flex;flex-direction:column;gap:8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;cursor:pointer}
+.card-h .to{font-weight:800;font-size:.95rem;color:var(--cyan)}
+.card-h .via{font-size:.72rem;color:var(--mag);margin-bottom:2px}
+.card-h .sub{font-size:.7rem;color:var(--m)}
+.pill{display:inline-block;padding:1px 6px;border-radius:4px;font-size:.65rem;font-weight:700;margin-right:3px}
+.pill.y{background:#0e3a2f;color:#6ee7b7}.pill.j{background:#1e3a5f;color:#93c5fd}.pill.f{background:#3b2f1e;color:#fcd34d}
+.line{font-size:.75rem;margin-top:4px;color:var(--t)}
+.line .dim{color:var(--m)}
+.money{color:var(--ok);font-weight:700}
+.detail{display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);font-size:.72rem;color:var(--m)}
+.detail.open{display:block}
+.detail .grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px}
+.detail b{color:var(--t)}
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:99;color:var(--t)}
+.hide{display:none!important}
+.empty{text-align:center;padding:40px;color:var(--m)}
+.eng{padding:4px 6px;border:1px solid var(--line);border-radius:6px;margin-top:3px;cursor:pointer;font-size:.65rem}
+.eng.on{border-color:var(--cyan);background:rgba(34,211,238,.1)}
+.tag{display:inline-block;padding:0 4px;border-radius:3px;font-size:.55rem;font-weight:700;margin-right:2px}
+.tag.s{background:#0e3a4a;color:#67e8f9}.tag.f{background:#3b2f1e;color:#fcd34d}.tag.c{background:#1f3d2a;color:#6ee7b7}
+.ac-big{font-size:1.25rem;font-weight:800;color:var(--mag);line-height:1}
+.route-block{margin:8px 0 6px;padding:8px 10px;background:#080414;border:1px solid var(--line);border-radius:8px}
+.route-title{font-size:.9rem;font-weight:700;color:var(--cyan)}
+.route-stop{font-size:.8rem;color:var(--mag);margin-top:3px}
+.dem-line{margin-top:8px!important;font-size:.85rem}
+.pill.big{font-size:.8rem;padding:3px 9px}
+.card-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.card-left{flex:1;min-width:0}
+.card-right{text-align:right;flex-shrink:0}
+.route-line{font-size:.92rem;font-weight:700;line-height:1.35;flex-wrap:wrap}
+.rt-o{color:#22d3ee}.rt-v{color:#e879f9}.rt-d{color:#4ade80}.rt-arr{color:#9b8ec4;margin:0 2px}.rt-dim{color:#9b8ec4;font-weight:500;font-size:.78rem}
+.route-meta{font-size:.75rem;color:var(--m);margin-top:4px}
+.mkt{color:var(--ok)}
+.card-mid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px;margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+.col.econ{font-size:.75rem;color:var(--m);display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;align-content:start}
+.col.econ b{color:var(--t)}
+.ac-lbl{font-size:.65rem;color:var(--m)}
+.ac-tpd{font-size:.7rem;color:var(--cyan);margin-top:2px}
+@media(max-width:800px){.card-mid{grid-template-columns:1fr}}
+
+
+
+</style>
+</head>
+<body>
+<div id="loader">Loading…</div>
+<header>
+  <div class="brand">
+    <img src="garo_logo.png" alt="GARO" onerror="this.style.display='none'"/>
+    <div>
+      <h1>GARO-AIRLINE — Pax / Cargo</h1>
+      <div class="sub">AM4-compatible search · our UI</div>
+    </div>
+  </div>
+  <div class="hdr">
+    <a class="nav" href="index.html">← Charter</a>
+    <a class="grok" href="https://grok.x.ai/" target="_blank" rel="noopener">✦ Grok AI</a>
+    <button type="button" id="btnLang">ES</button>
+  </div>
+</header>
+<div class="tabs">
+  <button type="button" class="on" data-mode="pax">Pax</button>
+  <button type="button" data-mode="cargo">Cargo</button>
+</div>
+<div class="layout">
+<aside class="side">
+  <h3 id="lAc">Aircraft</h3>
+  <div class="rel"><input id="acSearch" placeholder="d428j, a350, cessna…" autocomplete="off"/><div class="drop" id="acDrop"></div></div>
+  <div id="selCard" class="hide">
+    <div class="sel" style="display:flex;gap:8px;align-items:flex-start">
+      <img id="selImg" alt="" style="width:72px;height:48px;object-fit:contain;border-radius:6px;background:#0a0618;flex-shrink:0"/>
+      <div style="min-width:0;flex:1">
+        <div class="name" id="selName">—</div>
+        <div class="meta" id="selMeta">—</div>
+        <div class="meta" id="selEng" style="margin-top:2px;color:var(--cyan)">—</div>
+      </div>
+      <button type="button" id="btnClearAc" title="Clear aircraft" style="background:#1a0a30;border:1px solid var(--line);color:#fff;border-radius:8px;padding:4px 8px;cursor:pointer;font-weight:800;flex-shrink:0">✕</button>
+    </div>
+    <div id="engList" style="margin-top:6px"></div>
+    <label class="lbl" style="margin-top:8px">+10% speed</label>
+    <select id="bonus"><option value="0">No</option><option value="1" selected>Yes</option></select>
+  </div>
+
+  <h3 id="lHub">Origin</h3>
+  <div class="rel"><input id="hubSearch" placeholder="ICAO / city" autocomplete="off"/><div class="drop" id="hubDrop"></div></div>
+  <div class="chips" id="hubChips"></div>
+
+  <h3 id="lDest">Destination</h3>
+  <div class="seg">
+    <button type="button" class="on" data-dest="any" id="destAny">Any</button>
+    <button type="button" data-dest="specific" id="destSpec">Specific</button>
+  </div>
+  <div id="destBox" class="hide">
+    <div class="rel"><input id="destSearch" placeholder="Filter dest…" autocomplete="off"/><div class="drop" id="destDrop"></div></div>
+    <div class="chips" id="destChips"></div>
+  </div>
+
+  <h3>Distance (km)</h3>
+  <div class="row2">
+    <div><label class="lbl">Min</label><input id="minD" type="number" value="100" min="100"/></div>
+    <div><label class="lbl">Max</label><input id="maxD" type="number" value=""/></div>
+  </div>
+
+  <h3>Time (hr)</h3>
+  <div class="row2">
+    <div><label class="lbl">Min</label><input id="minT" type="number" step="0.1" placeholder="—"/></div>
+    <div><label class="lbl">Max</label><input id="maxT" type="number" step="0.1" placeholder="—"/></div>
+  </div>
+
+  <h3>AC per route</h3>
+  <div class="row2">
+    <input id="acPer" type="number" min="1" placeholder="Auto"/>
+    <button type="button" class="btn-max" id="btnAcMax">Maximise</button>
+  </div>
+
+  <h3>Trips per day / AC</h3>
+  <div class="row2">
+    <select id="tpd">
+      <option value="0">Maximise</option>
+      <option value="8">8</option><option value="6">6</option><option value="4">4</option>
+      <option value="3">3</option><option value="2">2</option><option value="1">1</option>
+    </select>
+    <button type="button" class="btn-max" id="btnTpdMax">Maximise</button>
+  </div>
+
+  <h3>Cost Index</h3>
+  <div class="row2">
+    <input id="ci" type="number" value="200" min="0" max="200"/>
+    <button type="button" class="btn-max" id="btnAlign" title="CI for max TPD">Align Max Time</button>
+  </div>
+
+  <h3>Config Algorithm</h3>
+  <select id="cfgAlgo">
+    <option value="auto">Auto</option>
+    <option value="FJY">F &gt; J &gt; Y</option>
+    <option value="FYJ">F &gt; Y &gt; J</option>
+    <option value="JFY">J &gt; F &gt; Y</option>
+    <option value="JYF">J &gt; Y &gt; F</option>
+    <option value="YFJ">Y &gt; F &gt; J</option>
+    <option value="YJF">Y &gt; J &gt; F</option>
+    <option value="Y">Y Only</option>
+    <option value="J">J Only</option>
+    <option value="F">F Only</option>
+    <option value="spread">Spread</option>
+  </select>
+
+  <h3>Sort</h3>
+  <div class="seg">
+    <button type="button" class="on" data-sort="dayAc" id="sortDay">$/d/ac</button>
+    <button type="button" data-sort="trip" id="sortTrip">$/t</button>
+  </div>
+
+  <button type="button" class="adv-toggle" id="btnAdv">▸ Advanced settings</button>
+  <div class="adv" id="adv">
+    <label class="lbl">Game mode</label>
+    <select id="realism"><option value="0">Easy</option><option value="1">Realism</option></select>
+    <label class="lbl" style="margin-top:6px">Fuel price</label>
+    <input id="fuelPrice" type="number" value="1100"/>
+    <label class="lbl" style="margin-top:6px">CO₂ price</label>
+    <input id="co2Price" type="number" value="200"/>
+    <label class="lbl" style="margin-top:6px">Pax load</label>
+    <input id="paxLoad" type="number" value="0.99" step="0.01" min="0" max="1"/>
+    <label class="lbl" style="margin-top:6px">Max A/C filter</label>
+    <input id="maxAc" type="number" value="50" min="1"/>
+  </div>
+</aside>
+<main class="main">
+  <div class="toolbar">
+    <button type="button" class="btn" id="btnSearch">Search routes</button>
+    <button type="button" class="btn sec" id="btnCsv">CSV</button>
+    <span class="stats" id="stats">Select aircraft + origin</span>
+  </div>
+  <div class="cards" id="cards"><div class="empty">Results appear here</div></div>
+</main>
+</div>
+<script>
+const IMG='https://cdn.jsdelivr.net/gh/abc8747/am4@master/am4/assets/img/aircraft/';
+let MODE='pax', LANG='en', DEST_MODE='any', SORT='dayAc';
+let ALL=[], AIRPORTS=[], AIR_BY={}, ICAO_IDX={}, DEM_BUF=null, AP_COUNT=3907;
+let planeIdx=-1, engIdx=0, SELECTED=[], DEST_FILTER=[], rows=[];
+const $=id=>document.getElementById(id);
+const esc=s=>{const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML};
+const money=n=>{if(!isFinite(n))return'—';return '$'+Math.round(n).toLocaleString('en-US')};
+const pairKey=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+
+/** Correct haversine (tested) */
+function hav(lat1,lon1,lat2,lon2){
+  const R=6371, p=Math.PI/180;
+  const a=0.5-Math.cos((lat2-lat1)*p)/2+Math.cos(lat1*p)*Math.cos(lat2*p)*(1-Math.cos((lon2-lon1)*p))/2;
+  return 2*R*Math.asin(Math.sqrt(Math.min(1,Math.max(0,a))));
+}
+function speedRatio(ci){ci=Math.max(0,Math.min(200,+ci||200));return Math.max(0.35,Math.min(1,0.642+0.00179*ci))}
+function flightHours(km,v,ci){const vp=v*speedRatio(ci);return vp>0?km/vp:99}
+function fmtTime(h){if(!isFinite(h)||h<=0)return'—';const hh=Math.floor(h),mm=Math.min(59,Math.round((h-hh)*60));return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':00'}
+function speedBase(){const p=ALL[planeIdx];if(!p)return 800;let v=Number(((p.engines||[{speed:800}])[engIdx]||{}).speed)||800;const b=document.getElementById('bonus');if(b&&+b.value)v*=1.1;return v}
+function fuelRate(){const p=ALL[planeIdx];if(!p)return 10;return Number((p.engines||[{fuel:10}])[engIdx].fuel)||10}
+function planeFilter(p){return MODE==='cargo'?(p.type===1):p.type!==1}
+function triIndex(i,j){if(i===j)return -1;if(i>j){const t=i;i=j;j=t}return i*(2*AP_COUNT-i-1)/2+(j-i-1)}
+function getPaxDemand(o,d){
+  if(!DEM_BUF)return null;
+  const oi=ICAO_IDX[o],di=ICAO_IDX[d];
+  if(oi==null||di==null||oi===di)return null;
+  const idx=triIndex(oi,di); if(idx<0||idx*6+6>DEM_BUF.byteLength)return null;
+  const v=new DataView(DEM_BUF), off=idx*6;
+  return {y:v.getUint16(off,true),j:v.getUint16(off+2,true),f:v.getUint16(off+4,true)};
+}
+function ticketsPax(d,realism){
+  if(window.GARO_AM4) return GARO_AM4.ticketsPax(d, realism?'realism':'easy');
+  const y=0.4*d+170,j=0.8*d+560,f=1.2*d+1200;
+  return {optimal:{y:y*1.1,j:j*1.08,f:f*1.06}};
+}
+
+/** Cargo demand estimate (lbs/day) when no cargo matrix — scaled by markets & distance */
+function estCargoDemand(oAp,dAp,km){
+  const mo=(oAp&&oAp.market!=null)?Number(oAp.market):50;
+  const md=(dAp&&dAp.market!=null)?Number(dAp.market):50;
+  const m=(mo+md)/2;
+  // rough scale to produce AM4-like order of magnitude
+  const factor=m*m*(0.5+km/12000);
+  const L=Math.round(factor*180);
+  const H=Math.round(factor*55);
+  return {L:Math.max(1000,L), H:Math.max(500,H), est:true};
+}
+/** Cargo config: % of capacity to Large vs Heavy (lbs) */
+function makeCargoConfig(cap,algo){
+  let lPct=0.75, hPct=0.25;
+  if(algo==='L'){lPct=1;hPct=0}
+  else if(algo==='H'){lPct=0;hPct=1}
+  else if(algo==='spread'){lPct=0.5;hPct=0.5}
+  else if(algo==='FJY'||algo==='auto'){lPct=0.84;hPct=0.16} // match Help default-ish
+  const L=Math.round(cap*lPct), H=Math.round(cap*hPct);
+  return {L,H,lPct:Math.round(lPct*100),hPct:Math.round(hPct*100)};
+}
+
+function ticketsCargo(d){
+  if(window.GARO_AM4) return GARO_AM4.ticketsCargo(d,false);
+  return {optimal:{L:(0.0776*d+85)*1.1,H:(0.0518*d+24.6)*1.08}};
+}
+function cdFlt(d,ci,realism){
+  if(window.GARO_AM4) return Math.round(GARO_AM4.contributionPaper(d,ci,{realism,kDrop:0.875}).expected*10)/10;
+  return Math.round(0.0064*d*(3-ci/100)*0.875*(realism?1.5:1)*10)/10;
+}
+/** Config algorithms (AM4-style priority) capacity units: Y=1 J=2 F=3 */
+function makeConfig(algo,cap,dem){
+  const load=Math.min(1,Math.max(0,+$('paxLoad').value||0.99));
+  const Y=Math.max(0,Math.floor(dem.y*load)), J=Math.max(0,Math.floor(dem.j*load)), F=Math.max(0,Math.floor(dem.f*load));
+  let y=0,j=0,f=0, rem=cap;
+  const takeF=()=>{const n=Math.min(F-f,Math.floor(rem/3));f+=n;rem-=n*3};
+  const takeJ=()=>{const n=Math.min(J-j,Math.floor(rem/2));j+=n;rem-=n*2};
+  const takeY=()=>{const n=Math.min(Y-y,rem);y+=n;rem-=n};
+  const order={
+    auto:()=>{takeF();takeJ();takeY(); if(rem>0){y+=rem;rem=0}},
+    FJY:()=>{takeF();takeJ();takeY()},
+    FYJ:()=>{takeF();takeY();takeJ()},
+    JFY:()=>{takeJ();takeF();takeY()},
+    JYF:()=>{takeJ();takeY();takeF()},
+    YFJ:()=>{takeY();takeF();takeJ()},
+    YJF:()=>{takeY();takeJ();takeF()},
+    Y:()=>{takeY(); if(rem) {y+=rem;rem=0}},
+    J:()=>{const n=Math.min(J,Math.floor(cap/2));j=n;rem=cap-2*n},
+    F:()=>{const n=Math.min(F,Math.floor(cap/3));f=n;rem=cap-3*n},
+    spread:()=>{
+      // proportional to demand units
+      const tot=Y+2*J+3*F||1;
+      f=Math.min(F,Math.floor(cap*(3*F/tot)/3));
+      j=Math.min(J,Math.floor((cap-3*f)*(2*J/tot)/2));
+      y=Math.min(Y,cap-3*f-2*j);
+    }
+  };
+  (order[algo]||order.auto)();
+  return {y,j,f};
+}
+function autoTpd(h){
+  const cycle=Math.max(0.5,h*2+1);
+  const raw=Math.floor(24/cycle);
+  for(const a of [8,6,4,3,2,1]) if(raw>=a) return a;
+  return 1;
+}
+function findStop(oIcao,dIcao,range){
+  const o=AIR_BY[oIcao],d=AIR_BY[dIcao];
+  if(!o||!d||o.lat==null||d.lat==null) return null;
+  let best=null,bestS=1e18;
+  for(const b of AIRPORTS){
+    if(b.icao===oIcao||b.icao===dIcao||b.lat==null||(b.rwy||0)<3000) continue;
+    const d1=hav(o.lat,o.lng,b.lat,b.lng), d2=hav(b.lat,b.lng,d.lat,d.lng);
+    if(d1>range*1.02||d2>range*1.02) continue;
+    const sc=Math.max(d1,d2)+0.05*(d1+d2);
+    if(sc<bestS){bestS=sc;best={icao:b.icao,city:b.city||b.name,country:b.country||''}}
+  }
+  return best;
+}
+
+/* aircraft UI */
+
+function showPlane(){
+  const p=ALL[planeIdx]; if(!p){$('selCard').classList.add('hide');return}
+  $('selCard').classList.remove('hide');
+  const e=(p.engines||[{}])[engIdx]||{};
+  const imgEl=$('selImg');
+  if(imgEl){ imgEl.src=IMG+(p.img||'a320.webp'); imgEl.onerror=function(){this.src=IMG+'a320.webp'}; }
+  $('selName').textContent=p.name+' ['+(p.shortname||'')+']';
+  $('selMeta').textContent='Spd '+Math.round(speedBase())+' · Cap '+p.capacity+' · Rng '+p.range+' · RWY '+p.rwy+' · Max '+(p.range*2)+' km';
+  if($('selEng')) $('selEng').textContent=(e.ename||'—')+' · $'+(p.cost?Math.round(p.cost).toLocaleString('en-US'):'—');
+  const engs=p.engines||[];
+  const el=$('engList');
+  if(el){
+    el.innerHTML=engs.map((en,i)=>
+      '<div class="eng'+(i===engIdx?' on':'')+'" data-ei="'+i+'">'+i+' '+esc(en.ename||'')+
+      ' <span class="tag s">S '+Math.round(en.speed||0)+'</span>'+
+      ' <span class="tag f">F '+(en.fuel!=null?Number(en.fuel).toFixed(1):'?')+'</span>'+
+      ' <span class="tag c">C '+(en.co2!=null?Number(en.co2).toFixed(2):'?')+'</span></div>'
+    ).join('');
+    el.querySelectorAll('[data-ei]').forEach(node=>node.onclick=()=>{engIdx=+node.dataset.ei;showPlane()});
+  }
+}
+
+function filterPlanes(q){q=(q||'').toLowerCase();return ALL.filter(planeFilter).filter(p=>!q||p.name.toLowerCase().includes(q)||(p.shortname||'').toLowerCase().includes(q)).slice(0,80)}
+function renderAcDrop(){
+  if(planeIdx>=0){$('acDrop').classList.remove('open');return}
+  const list=filterPlanes($('acSearch').value);
+  $('acDrop').innerHTML=list.map((p,i)=>'<div class="opt" data-i="'+i+'"><b>'+esc(p.name)+'</b> ['+esc(p.shortname||'')+'] · Rng '+p.range+' · Cap '+p.capacity+'</div>').join('')||'<div class="opt">—</div>';
+  $('acDrop').classList.add('open');
+  $('acDrop').querySelectorAll('[data-i]').forEach(el=>el.onclick=()=>{
+    const p=list[+el.dataset.i]; planeIdx=ALL.findIndex(x=>x.name===p.name); engIdx=0;
+    $('acSearch').value=''; $('acDrop').classList.remove('open');
+    showPlane();
+    if(!$('maxD').value) $('maxD').value=Math.min(20000,p.range*2);
+  });
+}
+$('acSearch').oninput=$('acSearch').onfocus=()=>{if(planeIdx<0)renderAcDrop()};
+document.addEventListener('click',function(ev){if(ev.target&&ev.target.id==='btnClearAc'){planeIdx=-1;engIdx=0;$('selCard').classList.add('hide');$('acSearch').value='';$('acSearch').focus();}});
+document.addEventListener('change',function(e){if(e.target&&e.target.id==='bonus'&&planeIdx>=0)showPlane();}); // bonus change
+document.addEventListener('click',e=>{if(!e.target.closest('.rel')){['acDrop','hubDrop','destDrop'].forEach(id=>$(id).classList.remove('open'))}});
+
+function renderChips(){
+  $('hubChips').innerHTML=SELECTED.map(x=>'<span class="chip">'+x.icao+' <button type="button" data-rm="'+x.icao+'">×</button></span>').join('');
+  $('hubChips').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{SELECTED=SELECTED.filter(s=>s.icao!==b.dataset.rm);renderChips()});
+  $('destChips').innerHTML=DEST_FILTER.map(x=>'<span class="chip">'+x.icao+' <button type="button" data-rd="'+x.icao+'">×</button></span>').join('');
+  $('destChips').querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>{DEST_FILTER=DEST_FILTER.filter(s=>s.icao!==b.dataset.rd);renderChips()});
+}
+function renderHubDrop(){
+  const q=$('hubSearch').value.trim().toLowerCase(); if(!q){$('hubDrop').classList.remove('open');return}
+  const hits=AIRPORTS.filter(a=>[a.icao,a.iata,a.name,a.city,a.country].some(x=>(x||'').toLowerCase().includes(q))).slice(0,40);
+  $('hubDrop').innerHTML=hits.map(o=>'<div class="opt" data-icao="'+o.icao+'"><b>'+o.icao+'</b> · '+(o.city||o.name)+'</div>').join('')||'<div class="opt">—</div>';
+  $('hubDrop').classList.add('open');
+  $('hubDrop').querySelectorAll('[data-icao]').forEach(el=>el.onclick=()=>{
+    const o=AIR_BY[el.dataset.icao]; if(!o)return;
+    if(!SELECTED.some(s=>s.icao===o.icao)) SELECTED.push({icao:o.icao,name:o.name,city:o.city||o.name,country:o.country||''});
+    $('hubSearch').value='';$('hubDrop').classList.remove('open');renderChips();
+  });
+}
+function renderDestDrop(){
+  const q=$('destSearch').value.trim().toLowerCase(); if(!q){$('destDrop').classList.remove('open');return}
+  const hits=AIRPORTS.filter(a=>[a.icao,a.iata,a.name,a.city].some(x=>(x||'').toLowerCase().includes(q))).slice(0,40);
+  $('destDrop').innerHTML=hits.map(o=>'<div class="opt" data-icao="'+o.icao+'"><b>'+o.icao+'</b> · '+(o.city||o.name)+'</div>').join('')||'<div class="opt">—</div>';
+  $('destDrop').classList.add('open');
+  $('destDrop').querySelectorAll('[data-icao]').forEach(el=>el.onclick=()=>{
+    const o=AIR_BY[el.dataset.icao]; if(!o)return;
+    if(!DEST_FILTER.some(s=>s.icao===o.icao)) DEST_FILTER.push({icao:o.icao,name:o.name,city:o.city||o.name,country:o.country||''});
+    $('destSearch').value='';$('destDrop').classList.remove('open');renderChips();
+  });
+}
+$('hubSearch').oninput=renderHubDrop;
+$('destSearch').oninput=renderDestDrop;
+$('destAny').onclick=()=>{DEST_MODE='any';$('destAny').classList.add('on');$('destSpec').classList.remove('on');$('destBox').classList.add('hide');DEST_FILTER=[];renderChips()};
+$('destSpec').onclick=()=>{DEST_MODE='specific';$('destSpec').classList.add('on');$('destAny').classList.remove('on');$('destBox').classList.remove('hide')};
+$('btnAdv').onclick=()=>{const a=$('adv');a.classList.toggle('open');$('btnAdv').textContent=a.classList.contains('open')?'▾ Advanced settings':'▸ Advanced settings'};
+$('btnTpdMax').onclick=()=>{$('tpd').value='0'};
+$('btnAcMax').onclick=()=>{$('acPer').value=''};
+$('sortDay').onclick=()=>{SORT='dayAc';$('sortDay').classList.add('on');$('sortTrip').classList.remove('on');if(rows.length)renderCards()};
+$('sortTrip').onclick=()=>{SORT='trip';$('sortTrip').classList.add('on');$('sortDay').classList.remove('on');if(rows.length)renderCards()};
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{
+  MODE=b.dataset.mode; document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('on',x===b));
+  if(planeIdx>=0&&!planeFilter(ALL[planeIdx])){planeIdx=-1;$('selCard').classList.add('hide')}
+  rows=[];$('cards').innerHTML='<div class="empty">—</div>';
+});
+
+function doSearch(){
+  if(planeIdx<0){alert('Select aircraft');return}
+  if(!SELECTED.length){alert('Select origin');return}
+  const t0=performance.now();
+  const plane=ALL[planeIdx], cap=plane.capacity||40, range=plane.range||2000, rwyN=+plane.rwy||0;
+  const minD=Math.max(100,+$('minD').value||100);
+  let maxD=+$('maxD').value; if(!maxD) maxD=range*2;
+  maxD=Math.min(maxD, range*2*1.02);
+  const minT=+$('minT').value||0, maxT=+$('maxT').value||99;
+  const ci=Math.max(0,Math.min(200,+$('ci').value||200));
+  const realism=+$('realism').value===1;
+  const tpdPref=+$('tpd').value||0;
+  const fixedAc=+$('acPer').value||0;
+  const maxAc=+$('maxAc').value||50;
+  const algo=$('cfgAlgo').value||'auto';
+  const fuelP=+$('fuelPrice').value||1100, co2P=+$('co2Price').value||200;
+  const v=speedBase(), destSet=DEST_MODE==='specific'&&DEST_FILTER.length?new Set(DEST_FILTER.map(d=>d.icao)):null;
+  const seen=new Set(); rows=[];
+
+  for(const hub of SELECTED){
+    const o=AIR_BY[hub.icao]; if(!o||o.lat==null) continue;
+    for(const a of AIRPORTS){
+      if(a.icao===hub.icao||a.lat==null) continue;
+      if(destSet&&!destSet.has(a.icao)) continue;
+      const km=Math.round(hav(o.lat,o.lng,a.lat,a.lng));
+      if(!isFinite(km)||km<minD||km>maxD) continue;
+      const needStop=km>range*1.02;
+      if(needStop&&km>range*2*1.02) continue;
+      if(realism&&rwyN>0&&(a.rwy||0)>0&&(a.rwy||0)<rwyN) continue;
+      const pk=pairKey(hub.icao,a.icao); if(seen.has(pk)) continue; seen.add(pk);
+
+      let stop=null;
+      if(needStop){ stop=findStop(hub.icao,a.icao,range); if(!stop) continue; }
+
+      let dem={y:0,j:0,f:0,L:0,H:0,est:false};
+      let cfg;
+      if(MODE==='cargo'){
+        const cd=estCargoDemand(o,a,km);
+        dem={y:0,j:0,f:0,L:cd.L,H:cd.H,est:!!cd.est};
+        cfg=makeCargoConfig(cap,algo);
+      }else{
+        dem=Object.assign({L:0,H:0,est:false}, getPaxDemand(hub.icao,a.icao)||{y:0,j:0,f:0});
+        cfg=makeConfig(algo,cap,dem);
+      }
+      let h=flightHours(km,v,ci); if(needStop) h=h*1.12+0.75;
+      if(h<minT||h>maxT) continue;
+      const tpd=tpdPref>0?tpdPref:autoTpd(h);
+      let acNeed;
+      if(MODE==='cargo'){
+        const carried=cfg.L+cfg.H || 1;
+        const demLbs=(dem.L+dem.H)||1;
+        acNeed=Math.max(1, Math.ceil(demLbs/(carried*tpd)));
+      }else{
+        const demEq=dem.y+2*dem.j+3*dem.f;
+        const seatEq=cfg.y+2*cfg.j+3*cfg.f || 1;
+        acNeed=Math.max(1, Math.ceil(demEq/(seatEq*tpd)));
+      }
+      if(fixedAc>0) acNeed=fixedAc;
+      if(acNeed>maxAc) continue;
+
+      const tix=MODE==='cargo'?ticketsCargo(km):ticketsPax(km,realism);
+      const load=+$('paxLoad').value||0.99;
+      let revenue=0;
+      if(MODE==='cargo'){
+        const lbsL=Math.min(cfg.L, Math.floor(dem.L*load));
+        const lbsH=Math.min(cfg.H, Math.floor(dem.H*load));
+        revenue=lbsL*(tix.optimal.L||0)+lbsH*(tix.optimal.H||0);
+      }else{
+        const sy=Math.min(cfg.y, Math.floor(dem.y*load));
+        const sj=Math.min(cfg.j, Math.floor(dem.j*load));
+        const sf=Math.min(cfg.f, Math.floor(dem.f*load));
+        revenue=sy*(tix.optimal.y||0)+sj*(tix.optimal.j||0)+sf*(tix.optimal.f||0);
+      }
+
+      const fuelLbs=fuelRate()*km*(needStop?1.08:1)*1.2;
+      const fuelCost=fuelLbs/1000*(fuelP/1000)*100; // rough scale for display
+      const check=Number(plane.check_cost)||0, maint=Math.max(Number(plane.maint)||400,1);
+      const acheck=check*(h/maint);
+      const repair=acheck*0.05;
+      const cost=fuelCost+acheck+repair;
+      const profit=revenue-cost;
+      const profitDayAc=profit*tpd;
+      const cd=cdFlt(km,ci,realism);
+
+      rows.push({
+        oIcao:hub.icao, oCity:hub.city||hub.name, oCountry:hub.country||(o.country||''), dIcao:a.icao, dest:a.city||a.name, dCountry:a.country||'',
+        stop, km, h, time:fmtTime(h), ci, needStop,
+        dem, cfg, tix, tpd, acNeed, cd,
+        revenue, fuelCost, acheck, repair, cost, profit, profitDayAc,
+        ticketStr: MODE==='pax'
+          ?('Y '+Math.round(tix.optimal.y)+' · J '+Math.round(tix.optimal.j)+' · F '+Math.round(tix.optimal.f))
+          :('L '+Math.round(tix.optimal.L)+' · H '+Math.round(tix.optimal.H)),
+        plane:plane.name,
+        market:(a.market!=null?Number(a.market):null), rwy:(a.rwy!=null?Number(a.rwy):0), hubCost:(a.hub_cost!=null?Number(a.hub_cost):null)
+      });
+    }
+  }
+  renderCards();
+  const ms=(performance.now()-t0).toFixed(1);
+  if(MODE==='cargo') $('stats').textContent=rows.length+' routes · '+ms+' ms · '+plane.name+' · cargo L/H demand (est.)';
+  else $('stats').textContent=rows.length+' routes · '+ms+' ms · '+plane.name+' · demand '+(DEM_BUF?'AM4':'—');
+}
+
+function renderCards(){
+  rows.sort((a,b)=> SORT==='trip' ? (b.profit-a.profit) : (b.profitDayAc-a.profitDayAc));
+  const show=rows.slice(0,200);
+  if(!show.length){$('cards').innerHTML='<div class="empty">No routes</div>';return}
+  const isCargo=MODE==='cargo';
+  $('cards').innerHTML=show.map((r,i)=>{
+    const oHub=esc(r.oCity||r.oIcao), oC=esc(r.oCountry||'');
+    const dHub=esc(r.dest||''), dC=esc(r.dCountry||'');
+    let routeHtml='<span class="rt-o">'+esc(r.oIcao)+'</span> <span class="rt-dim">'+oHub+(oC?' · '+oC:'')+'</span>';
+    if(r.stop){
+      routeHtml+=' <span class="rt-arr">→</span> <span class="rt-v">'+esc(r.stop.icao)+'</span> <span class="rt-dim">'+esc(r.stop.city||'')+(r.stop.country?' · '+esc(r.stop.country):'')+'</span>';
+    }
+    routeHtml+=' <span class="rt-arr">→</span> <span class="rt-d">'+esc(r.dIcao)+'</span> <span class="rt-dim">'+dHub+(dC?' · '+dC:'')+'</span>';
+    const mkt=(r.market!=null && r.market!=='') ? (r.market+'%') : '—';
+    const hubc=(r.hubCost!=null && isFinite(r.hubCost)) ? money(r.hubCost) : '—';
+
+    let demCfgTix;
+    if(isCargo){
+      demCfgTix=
+        '<div class="line dem-line"><span class="dim">Demand</span> '+
+          '<span class="pill y big">L '+(r.dem.L||0).toLocaleString()+'</span> '+
+          '<span class="pill j big">H '+(r.dem.H||0).toLocaleString()+'</span>'+
+          (r.dem.est?' <span class="dim">(est.)</span>':'')+'</div>'+
+        '<div class="line"><span class="dim">Config</span> '+
+          '<span class="pill y">L '+(r.cfg.lPct!=null?r.cfg.lPct:Math.round(100*(r.cfg.L||0)/Math.max(1,(r.cfg.L||0)+(r.cfg.H||0))))+'%</span> '+
+          '<span class="pill j">H '+(r.cfg.hPct!=null?r.cfg.hPct:Math.round(100*(r.cfg.H||0)/Math.max(1,(r.cfg.L||0)+(r.cfg.H||0))))+'%</span> '+
+          '<span class="dim">('+Math.round(r.cfg.L||0).toLocaleString()+' / '+Math.round(r.cfg.H||0).toLocaleString()+' lbs)</span></div>'+
+        '<div class="line"><span class="dim">Tickets</span> '+
+          '<span class="pill y">L $'+((r.tix.optimal.L||0).toFixed(2))+'</span> '+
+          '<span class="pill j">H $'+((r.tix.optimal.H||0).toFixed(2))+'</span></div>';
+    }else{
+      demCfgTix=
+        '<div class="line dem-line"><span class="dim">Demand</span> '+
+          '<span class="pill y big">Y '+r.dem.y+'</span> '+
+          '<span class="pill j big">J '+r.dem.j+'</span> '+
+          '<span class="pill f big">F '+r.dem.f+'</span></div>'+
+        '<div class="line"><span class="dim">Config</span> '+
+          '<span class="pill y">Y '+r.cfg.y+'</span> '+
+          '<span class="pill j">J '+r.cfg.j+'</span> '+
+          '<span class="pill f">F '+r.cfg.f+'</span></div>'+
+        '<div class="line"><span class="dim">Tickets</span> '+
+          '<span class="pill y">Y '+Math.round(r.tix.optimal.y||0)+'</span> '+
+          '<span class="pill j">J '+Math.round(r.tix.optimal.j||0)+'</span> '+
+          '<span class="pill f">F '+Math.round(r.tix.optimal.f||0)+'</span></div>';
+    }
+
+    return '<div class="card" data-i="'+i+'">'+
+      '<div class="card-top">'+
+        '<div class="card-left">'+
+          '<div class="route-line">'+routeHtml+'</div>'+
+          '<div class="route-meta"><b>'+r.km.toLocaleString()+' km</b> · '+r.time+
+            ' · Market <b class="mkt">'+mkt+'</b> · RWY '+(r.rwy||'—')+' · Hub '+hubc+'</div>'+
+        '</div>'+
+        '<div class="card-right">'+
+          '<div class="ac-big">'+r.acNeed+'</div>'+
+          '<div class="ac-lbl">aircraft</div>'+
+          '<div class="ac-tpd">'+r.tpd+' t/d</div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="card-mid">'+
+        '<div class="col">'+ demCfgTix +
+          '<div class="line dim">CI='+r.ci+' · C$'+r.cd+'/f · '+r.tpd+' t/d/ac × '+r.acNeed+' ac</div>'+
+          '<div class="line"><span class="money">'+money(r.profit)+'/t</span> · <span class="money">'+money(r.profitDayAc)+'/d/ac</span></div>'+
+        '</div>'+
+        '<div class="col econ">'+
+          '<div>Revenue <b class="money">'+money(r.revenue)+'</b></div>'+
+          '<div>Fuel (est.) <b>'+money(r.fuelCost)+'</b></div>'+
+          '<div>A-check <b>'+money(r.acheck)+'</b></div>'+
+          '<div>Repair <b>'+money(r.repair)+'</b></div>'+
+          '<div>Cost/trip <b>'+money(r.cost)+'</b></div>'+
+          '<div>Profit/trip <b class="money">'+money(r.profit)+'</b></div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
+$('btnSearch').onclick=doSearch;
+$('btnCsv').onclick=()=>{
+  if(!rows.length)return;
+  const h=['origin','dest_icao','dest','country','km','time','stop','dem_y','dem_j','dem_f','cfg_y','cfg_j','cfg_f','tpd','ac','cd','profit_trip','profit_day_ac'];
+  const lines=[h.join(',')];
+  rows.forEach(r=>lines.push([r.oIcao,r.dIcao,r.dest,r.dCountry,r.km,r.time,r.stop?r.stop.icao:'',r.dem.y,r.dem.j,r.dem.f,r.cfg.y,r.cfg.j,r.cfg.f,r.tpd,r.acNeed,r.cd,Math.round(r.profit),Math.round(r.profitDayAc)].join(',')));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));a.download='garo_pax.csv';a.click();
+};
+$('btnAlign').onclick=()=>{
+  // set CI so flight time supports max TPD roughly — keep CI 200 for short, lower for long
+  if(planeIdx<0)return;
+  const range=ALL[planeIdx].range||3000;
+  const targetH=7.5; // mid
+  // leave as user tool: set 200 default
+  $('ci').value=200;
+};
+
+$('btnLang').onclick=()=>{
+  LANG=LANG==='en'?'es':'en';$('btnLang').textContent=LANG==='en'?'ES':'EN';
+};
+
+async function load(){
+  if(location.protocol==='file:'){
+    document.body.innerHTML='<div style="color:#fff;padding:40px">Use START_LOCAL.bat → http://127.0.0.1:8501/paxcargo.html</div>';
+    return;
+  }
+  try{
+    $('loader').textContent='Loading planes & airports…';
+    const [pl,ap,idx]=await Promise.all([
+      fetch('planes.json').then(r=>r.json()),
+      fetch('airports.json').then(r=>r.json()),
+      fetch('icao_idx.json').then(r=>r.json())
+    ]);
+    ALL=pl; AIRPORTS=ap; ICAO_IDX=idx;
+    AIR_BY={}; for(const a of ap) AIR_BY[a.icao]=a;
+    AP_COUNT=ap.length||3907;
+    $('loader').classList.add('hide');
+    $('stats').textContent='Planes '+ALL.length+' · Airports '+AP_COUNT+' · loading demand…';
+    // self-tests
+    const dTest=Math.round(hav(25.2528,55.3644,1.35019,103.994));
+    console.log('selftest OMDB-WSSS km', dTest, 'expected ~5847', Math.abs(dTest-5847)<30?'OK':'FAIL');
+    loadDemand().catch(e=>{console.warn(e);$('stats').textContent+=' · demand offline'});
+  }catch(e){
+    $('loader').innerHTML='<div style="color:#fda4af;text-align:center">'+esc(String(e.message||e))+'<br/><button onclick="location.reload()">Retry</button></div>';
+  }
+}
+async function loadDemand(){
+  const resp=await fetch('pax_demand.bin.gz');
+  if(!resp.ok) throw new Error('demand missing');
+  const ds=new DecompressionStream('gzip');
+  DEM_BUF=await new Response(resp.body.pipeThrough(ds)).arrayBuffer();
+  // verify OMDB-OOMS
+  const d=getPaxDemand('OMDB','OOMS');
+  console.log('selftest OMDB-OOMS demand', d, d&&d.y===1046?'OK':'check');
+  $('stats').textContent='Planes '+ALL.length+' · AM4 demand ready · '+Math.round(DEM_BUF.byteLength/1e6)+' MB';
+}
+load();
+</script>
+</body>
+</html>

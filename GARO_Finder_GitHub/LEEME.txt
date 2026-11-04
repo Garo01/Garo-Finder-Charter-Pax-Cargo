@@ -1,0 +1,19 @@
+GARO-AIRLINE Route Finder
+=========================
+
+Charter  → index.html
+Pax/Cargo → paxcargo.html
+
+LOCAL:
+  Windows: doble clic START_LOCAL.bat
+  Luego abrir http://127.0.0.1:8501/
+
+GITHUB + WEB:
+  1. Sube esta carpeta completa a un repositorio GitHub
+  2. Activa GitHub Pages (Settings → Pages → main / root)
+     O conecta el repo en Netlify (publish = raíz)
+  3. Abre la URL pública del sitio
+
+No abras los HTML con doble clic (file://); los datos no cargan.
+
+Archivo grande: pax_demand.bin.gz (~30 MB) — necesario para demanda Pax real.

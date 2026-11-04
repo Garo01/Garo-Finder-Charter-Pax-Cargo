@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>GARO Charter Finder</title>
+<script src="am4_core.js?v=20261102d"></script>
+<style>
+:root{--bg:#05010a;--card:#0c0618;--panel:#100820;--line:#2a1050;--cyan:#22d3ee;--mag:#e879f9;--t:#e8f0ff;--m:#9b8ec4;
+--grad:linear-gradient(135deg,#22d3ee,#a855f7,#e879f9);--glow:0 0 14px rgba(34,211,238,.22)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--t);font-size:12px;
+background-image:radial-gradient(ellipse at 20% 0%,rgba(34,211,238,.07),transparent 50%),radial-gradient(ellipse at 90% 100%,rgba(232,121,249,.07),transparent 50%)}
+header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#0a0414,#1a0a28)}
+.brand{display:flex;align-items:center;gap:8px}
+.brand img{height:32px;filter:drop-shadow(0 0 6px rgba(34,211,238,.35))}
+.brand h1{font-size:.95rem;background:var(--grad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800}
+.brand .sub{font-size:.58rem;color:var(--m)}
+.hdr a,.hdr button{background:#1a0a30;border:1px solid var(--line);color:#fff;padding:5px 10px;border-radius:8px;text-decoration:none;font-size:.7rem;font-weight:600;cursor:pointer;margin-left:5px}
+.hdr a.grok{background:var(--grad);border:none;color:#0a0414}
+.hdr a.nav{border-color:var(--mag);color:var(--mag)}
+.shell{display:grid;grid-template-columns:1fr 240px;min-height:calc(100vh - 52px)}
+@media(max-width:1000px){.shell{grid-template-columns:1fr}}
+.work{padding:8px;display:flex;flex-direction:column;gap:7px;min-width:0}
+.top{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px}
+@media(max-width:960px){.top{grid-template-columns:1fr 1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px}
+.panel h3{font-size:.6rem;color:var(--cyan);text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;font-weight:700}
+input,select{width:100%;background:#080414;border:1px solid var(--line);color:var(--t);padding:5px 7px;border-radius:6px;font-size:.74rem}
+input:focus,select:focus{outline:none;border-color:var(--cyan)}
+.rel{position:relative}
+.drop{display:none;position:absolute;left:0;right:0;top:100%;z-index:40;max-height:180px;overflow:auto;background:#080414;border:1px solid var(--cyan);border-radius:8px;margin-top:2px;box-shadow:0 12px 28px #000c}
+.drop.open{display:block}
+.opt{padding:6px 8px;cursor:pointer;border-bottom:1px solid #1a1030;font-size:.7rem}
+.opt:hover{background:rgba(34,211,238,.1)}
+.sel{display:flex;gap:7px;align-items:center;margin-top:5px;padding:6px;background:#080414;border:1px solid #2a1860;border-radius:9px}
+.sel img{width:64px;height:42px;object-fit:contain;border-radius:5px;background:#0a0618}
+.sel .name{font-weight:700;font-size:.76rem;color:var(--cyan)}
+.sel .line{font-size:.64rem;color:var(--m);margin-top:1px}
+.tag{display:inline-block;padding:0 4px;border-radius:3px;font-size:.55rem;font-weight:700;margin-right:2px}
+.tag.s{background:#0e3a4a;color:#67e8f9}.tag.f{background:#3b2f1e;color:#fcd34d}.tag.c{background:#1f3d2a;color:#6ee7b7}
+.eng{padding:3px 5px;border:1px solid var(--line);border-radius:5px;margin-top:2px;cursor:pointer;font-size:.62rem}
+.eng.on{border-color:var(--cyan);background:rgba(34,211,238,.08)}
+.chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px;max-height:72px;overflow:auto}
+.chip{background:var(--grad);color:#0a0414;padding:2px 7px;border-radius:999px;font-size:.62rem;font-weight:700;display:inline-flex;gap:4px;align-items:center}
+.chip.dest{background:linear-gradient(135deg,#a855f7,#e879f9)}
+.chip button{border:none;background:0;color:#0a0414;cursor:pointer;font-weight:800;font-size:.7rem}
+.params{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.ctrl label{display:block;font-size:.52rem;color:var(--m);text-transform:uppercase;margin-bottom:1px}
+.chk{font-size:.64rem;color:var(--m);display:flex;gap:4px;align-items:center;grid-column:1/-1}
+.hint{grid-column:1/-1;font-size:.58rem;color:var(--mag);line-height:1.25;padding:4px 6px;background:rgba(232,121,249,.08);border:1px solid rgba(232,121,249,.2);border-radius:6px}
+.bar{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+button.btn{background:var(--grad);color:#0a0414;border:none;padding:8px 14px;border-radius:9px;cursor:pointer;font-weight:800;font-size:.78rem;box-shadow:var(--glow)}
+button.btn.sec{background:#1a1030;color:var(--t);box-shadow:none;border:1px solid var(--line)}
+.side{border-left:1px solid var(--line);background:var(--card);padding:10px;overflow:auto}
+.side h3{font-size:.7rem;color:var(--mag);margin-bottom:4px}
+.side .note{font-size:.6rem;color:var(--m);margin-bottom:8px;line-height:1.3}
+.hub-rec{background:#080414;border:1px solid var(--line);border-radius:8px;padding:7px;margin-bottom:5px;cursor:pointer}
+.hub-rec:hover{border-color:var(--cyan)}
+.hub-rec .t{font-weight:700;font-size:.72rem;color:var(--cyan)}
+.hub-rec .s{font-size:.62rem;color:var(--m)}
+.badge-n{display:inline-block;background:#1a1040;color:var(--cyan);padding:1px 6px;border-radius:999px;font-size:.58rem;font-weight:700;margin-top:3px}
+.stats{font-size:.65rem;color:var(--m)}
+.wrap{overflow:auto;flex:1;border:1px solid var(--line);border-radius:9px;background:var(--card)}
+table{width:100%;border-collapse:collapse;font-size:.66rem}
+th{position:sticky;top:0;background:#0a0618;padding:5px 4px;text-align:left;color:var(--cyan);cursor:pointer;border-bottom:2px solid var(--line);z-index:1;white-space:normal;line-height:1.15}
+td{padding:4px;border-bottom:1px solid var(--line);white-space:normal;word-break:break-word;line-height:1.2;vertical-align:top}
+tr:hover td{background:rgba(34,211,238,.05)}
+.badge{display:inline-block;padding:1px 4px;border-radius:3px;font-size:.58rem;font-weight:700}
+.b-ok{background:#064e3b;color:#6ee7b7}.b-mid{background:#3b2f1e;color:#fcd34d}.b-lo{background:#44403c;color:#a8a29e}
+#loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:99;flex-direction:column;gap:8px}
+.spin{width:30px;height:30px;border:3px solid #2a1050;border-top-color:var(--cyan);border-radius:50%;animation:s .8s linear infinite}
+@keyframes s{to{transform:rotate(360deg)}}
+.hide{display:none!important}
+.empty{text-align:center;padding:24px;color:var(--m)}
+</style>
+</head>
+<body>
+<div id="loader"><div class="spin"></div><p id="loadMsg">Loading…</p></div>
+<header>
+  <div class="brand">
+    <img src="garo_logo.png" alt="GARO" onerror="this.style.display='none'"/>
+    <div>
+      <h1>GARO-AIRLINE — Charter Finder</h1>
+      <div class="sub">Weekly charter · Y+J only · calibrated CI/time · Cap%</div>
+    </div>
+  </div>
+  <div class="hdr">
+    <a class="nav" href="paxcargo.html" style="background:linear-gradient(135deg,#22d3ee,#a855f7);color:#0a0414;border:none;padding:8px 14px;font-weight:800;box-shadow:0 0 14px rgba(34,211,238,.35)">✈ Pax / Cargo Finder</a>
+    <a class="grok" href="https://grok.x.ai/" target="_blank" rel="noopener">✦ Grok AI</a>
+    <button type="button" id="btnLang">ES</button>
+  </div>
+</header>
+<div class="shell">
+<div class="work">
+  <div class="top">
+    <div class="panel">
+      <h3 id="lAc">Aircraft</h3>
+      <div class="rel"><input id="acSearch" placeholder="a340, a380…" autocomplete="off"/><div class="drop" id="acDrop"></div></div>
+      <div id="selCard" class="hide">
+        <div class="sel">
+          <img id="selImg" alt=""/>
+          <div style="flex:1;min-width:0">
+            <div class="name" id="selName">—</div>
+            <div class="line" id="selEng">—</div>
+            <div class="line" id="selSpecs">—</div>
+            <div id="selTags" style="margin-top:2px"></div>
+          </div>
+          <button type="button" class="btn sec" id="btnClearAc" style="padding:4px 7px;width:auto">✕</button>
+        </div>
+        <div id="engList"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3 id="lHub">Origin hubs (multi)</h3>
+      <div class="rel"><input id="hubSearch" placeholder="ICAO · IATA · city · country" autocomplete="off"/><div class="drop" id="hubDrop"></div></div>
+      <div class="chips" id="hubChips"></div>
+    </div>
+    <div class="panel">
+      <h3 id="lDest">Destination hubs (multi · optional filter)</h3>
+      <div class="rel"><input id="destSearch" placeholder="Filter by dest ICAO / city…" autocomplete="off"/><div class="drop" id="destDrop"></div></div>
+      <div class="chips" id="destChips"></div>
+      <div style="font-size:.58rem;color:var(--m);margin-top:4px" id="destHint">Empty = all destinations in range</div>
+    </div>
+    <div class="panel">
+      <h3 id="lPar">Parameters</h3>
+      <div class="params">
+        <div class="ctrl"><label id="lBonus">+10% speed</label><select id="bonus"><option value="0">No</option><option value="1" selected>Yes</option></select></div>
+        <div class="ctrl"><label>CI</label><input id="ci" type="number" value="55" min="0" max="200"/></div>
+        <div class="ctrl"><label>Min km</label><input id="minD" type="number" value="5500"/></div>
+        <div class="ctrl"><label>Max km</label><input id="maxD" type="number" value="5999"/></div>
+        <div class="ctrl"><label id="lCyc">Cycles/wk</label><input id="cycles" type="number" value="10" min="1" max="40"/></div>
+        <div class="ctrl"><label id="lN"># Aircraft</label><input id="nAc" type="number" value="10" min="1" max="20"/></div>
+        <div class="ctrl"><label>Mkt %</label><input id="mkt" type="number" value="100" min="1" max="100"/></div>
+        <div class="ctrl"><label>Mode</label><select id="realism"><option value="0">Easy</option><option value="1">Realism</option></select></div>
+        <div class="chk"><input type="checkbox" id="useTgt"/> <span id="lUseTgt">Target time → auto CI</span></div>
+        <div class="ctrl hide" id="rowTgt"><label>Target</label><input id="tgtTime" value="7:11"/></div>
+        <div class="ctrl hide" id="rowCiA"><label>CI auto</label><input id="ciAuto" readonly style="border-color:#22d3ee;color:#22d3ee"/></div>
+      </div>
+      <button type="button" class="btn sec hide" id="btnApplyCI" style="width:100%;margin-top:5px;padding:5px;font-size:.7rem">Apply auto CI</button>
+    </div>
+  </div>
+  <div class="bar">
+    <button type="button" class="btn" id="btnSearch">Search routes</button>
+    <button type="button" class="btn sec" id="btnCsv">Export CSV</button>
+    <span class="stats" id="stats">Charter = Weekly Y + J only (no F)</span>
+  </div>
+  <div class="wrap">
+    <table>
+      <thead><tr>
+        <th data-k="origin">Origin</th><th data-k="dest">Dest</th><th data-k="pair">Pair</th>
+        <th data-k="km">km</th><th data-k="time">Time</th><th data-k="capScore">Cap%</th>
+        <th data-k="y">Dem Y</th><th data-k="j">Dem J</th><th data-k="cfgY">Cfg Y</th><th data-k="cfgJ">Cfg J</th>
+        <th data-k="cdWeek">C/D wk</th><th data-k="cdCyc">C/D cyc</th>
+        <th data-k="ticket">Ticket Y/J</th><th data-k="cost">Cost</th><th data-k="rwy">RWY</th>
+      </tr></thead>
+      <tbody id="tbody"><tr><td colspan="15" class="empty">Select aircraft + origin hub(s)</td></tr></tbody>
+    </table>
+  </div>
+</div>
+<aside class="side">
+  <h3 id="lBest">★ Best charter hubs</h3>
+  <div class="note" id="lBestNote">Selected aircraft · 5500–5999 · Cap%</div>
+  <div id="bestList"></div>
+</aside>
+</div>
+<script>
+const IMG='https://cdn.jsdelivr.net/gh/abc8747/am4@master/am4/assets/img/aircraft/';
+let LANG='en', ALL=[], ORIGINS=[], DEMAND={}, BEST=[], AIR_BY={}, DEST_POOL=[];
+let planeIdx=-1, engIdx=0, SELECTED=[], DEST_FILTER=[], rows=[], sortKey='capScore', sortAsc=false;
+const $=id=>document.getElementById(id);
+const esc=s=>{const d=document.createElement('div');d.textContent=s==null?'':String(s);return d.innerHTML};
+const money=n=>!isFinite(n)||n==null?'—':('$'+Math.round(n).toLocaleString('en-US'));
+const pairKey=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+const parseTime=s=>{s=String(s||'').trim().replace(',','.');if(s.includes(':')){const p=s.split(':');return(+p[0]||0)+(+p[1]||0)/60}return parseFloat(s)||0};
+const fmtTime=h=>{if(!isFinite(h)||h<=0)return'—';const hh=Math.floor(h),mm=Math.min(59,Math.round((h-hh)*60));return hh+':'+String(mm).padStart(2,'0')};
+
+function speedRatio(ci){ci=Math.max(0,Math.min(200,Number(ci)||200));return Math.max(0.35,Math.min(1,0.642+0.00179*ci))}
+function flightHours(d,v,ci){const vp=v*speedRatio(ci);return vp>0?d/vp:99}
+function ciForTime(d,v,T){if(T<=0||v<=0||d<=0)return 200;const r=d/(v*T);if(r>=1)return 200;if(r<=0.35)return 0;return Math.max(0,Math.min(200,Math.round((r-0.642)/0.00179)))}
+function speedBase(){const p=ALL[planeIdx];if(!p)return 800;const e=(p.engines||[{speed:800}])[engIdx]||{speed:800};let v=Number(e.speed)||800;if(+$('bonus').value)v*=1.1;return v}
+function ciVal(km){if($('useTgt').checked)return ciForTime(km,speedBase(),parseTime($('tgtTime').value)||7.183);return Math.max(0,Math.min(200,+$('ci').value||55))}
+function ticketsYJ(d,realism){
+  if(window.GARO_AM4){const t=GARO_AM4.ticketsPax(d,realism?'realism':'easy');return 'Y '+money(t.optimal.y)+' · J '+money(t.optimal.j)}
+  return 'Y '+money((0.4*d+170)*1.1)+' · J '+money((0.8*d+560)*1.08);
+}
+function costFlight(d,ci){
+  const p=ALL[planeIdx];if(!p)return 0;
+  const h=flightHours(d,speedBase(),ci);
+  const check=Number(p.check_cost)||0,m=Math.max(Number(p.maint)||400,1);
+  const v=Math.max(speedBase(),1);
+  return check*(h/m)+check/(m*v)*d*0.15;
+}
+function capScore(dy,dj,cap,cyc,mkt){
+  const f=Math.max(cyc,1),demY=Math.round(dy*mkt),demJ=Math.round(dj*mkt);
+  let y,j;
+  if(window.GARO_AM4){const s=GARO_AM4.charterSeats(demY,demJ,cap,f);y=s.y;j=s.j}
+  else{j=Math.min(Math.floor(demJ/f),Math.floor(cap/2));y=Math.max(0,Math.min(Math.floor(demY/f),cap-2*j))}
+  const need=y*f+j*f,got=Math.min(demY,y*f)+Math.min(demJ,j*f);
+  return{score:need>0?Math.min(100,Math.round(100*got/need)):0,y,j,demY,demJ};
+}
+function cdProg(d,ci,realism){
+  const n=+$('nAc').value||10,cyc=Math.max(1,+$('cycles').value||10);
+  if(window.GARO_AM4){const p=GARO_AM4.contributionCharterProgram(d,ci,cyc,n,{realism});return{week:p.perAcProgram,cyc:p.perAcAvg}}
+  const k=realism?1.5:1,c1=45*k,c2=(n>=10?220:n>=5?115:50)*k;
+  const week=c1+c2*(cyc-1);return{week:Math.round(week*10)/10,cyc:Math.round(week/cyc*10)/10};
+}
+function grade(s){if(s>=85)return'b-ok';if(s>=50)return'b-mid';return'b-lo'}
+
+function updateAuto(){$('ciAuto').value=ciForTime(5750,speedBase(),parseTime($('tgtTime').value)||7.183)}
+function syncTgt(){
+  const on=$('useTgt').checked;
+  $('rowTgt').classList.toggle('hide',!on);$('rowCiA').classList.toggle('hide',!on);$('btnApplyCI').classList.toggle('hide',!on);
+  if(on)updateAuto();
+}
+
+function filterPlanes(q){q=(q||'').toLowerCase();return ALL.filter(p=>p.type!==1).filter(p=>!q||p.name.toLowerCase().includes(q)||(p.shortname||'').toLowerCase().includes(q)).slice(0,40)}
+function renderAcDrop(){
+  if(planeIdx>=0){$('acDrop').classList.remove('open');return}
+  const list=filterPlanes($('acSearch').value);
+  $('acDrop').innerHTML=list.map((p,i)=>'<div class="opt" data-i="'+i+'"><b>'+esc(p.name)+'</b> <span style="color:var(--m)">['+esc(p.shortname||'')+']</span></div>').join('')||'<div class="opt">—</div>';
+  $('acDrop').classList.add('open');
+  $('acDrop').querySelectorAll('[data-i]').forEach(el=>el.onclick=()=>selectPlane(list[+el.dataset.i]));
+}
+function selectPlane(p){planeIdx=ALL.findIndex(x=>x.name===p.name);engIdx=0;$('acSearch').value='';$('acDrop').classList.remove('open');showSel();if($('useTgt').checked)updateAuto();renderBest()}
+function showSel(){
+  const p=ALL[planeIdx];if(!p){$('selCard').classList.add('hide');return}
+  $('selCard').classList.remove('hide');
+  const e=(p.engines||[])[engIdx]||{};
+  $('selImg').src=IMG+(p.img||'a320.webp');$('selImg').onerror=function(){this.src=IMG+'a320.webp'};
+  $('selName').textContent=p.name+' ['+(p.shortname||'')+']';
+  $('selEng').textContent=(e.ename||'—')+' · '+money(p.cost);
+  $('selSpecs').textContent='Spd '+Math.round(speedBase())+' · Cap '+p.capacity+' · Rng '+p.range+' · RWY '+p.rwy;
+  $('selTags').innerHTML='<span class="tag s">S '+Math.round(e.speed||0)+'</span><span class="tag f">F '+(e.fuel!=null?Number(e.fuel).toFixed(1):'?')+'</span><span class="tag c">C '+(e.co2!=null?Number(e.co2).toFixed(2):'?')+'</span>';
+  const engs=p.engines||[];
+  $('engList').innerHTML=engs.length>1?engs.map((en,i)=>'<div class="eng'+(i===engIdx?' on':'')+'" data-ei="'+i+'">'+i+' '+esc(en.ename)+' <span class="tag s">S '+Math.round(en.speed||0)+'</span></div>').join(''):'';
+  $('engList').querySelectorAll('[data-ei]').forEach(el=>el.onclick=()=>{engIdx=+el.dataset.ei;showSel();if($('useTgt').checked)updateAuto()});
+}
+$('acSearch').oninput=()=>{if(planeIdx<0)renderAcDrop()};
+$('acSearch').onfocus=()=>{if(planeIdx<0)renderAcDrop()};
+$('btnClearAc').onclick=()=>{planeIdx=-1;$('selCard').classList.add('hide');$('acSearch').focus();renderBest()};
+document.addEventListener('click',e=>{if(!e.target.closest('.rel')){['acDrop','hubDrop','destDrop'].forEach(id=>$(id).classList.remove('open'))}});
+
+function renderChips(){
+  $('hubChips').innerHTML=SELECTED.map(x=>'<span class="chip">'+x.icao+' · '+(x.city||x.name)+' <button type="button" data-rm="'+x.icao+'">×</button></span>').join('');
+  $('hubChips').querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{SELECTED=SELECTED.filter(s=>s.icao!==b.dataset.rm);renderChips();buildDestPool()});
+  $('destChips').innerHTML=DEST_FILTER.map(x=>'<span class="chip dest">'+x.icao+' · '+(x.city||x.name)+' <button type="button" data-rd="'+x.icao+'">×</button></span>').join('');
+  $('destChips').querySelectorAll('[data-rd]').forEach(b=>b.onclick=()=>{DEST_FILTER=DEST_FILTER.filter(s=>s.icao!==b.dataset.rd);renderChips()});
+}
+function buildDestPool(){
+  const map=new Map();
+  for(const h of SELECTED){
+    for(const r of(DEMAND[h.icao]||[])){
+      if(!map.has(r[0])) map.set(r[0],{icao:r[0],name:r[1],country:r[2],city:r[1]});
+    }
+  }
+  DEST_POOL=[...map.values()];
+}
+function hubMatch(o,q){q=q.toLowerCase();return[o.icao,o.iata,o.name,o.city,o.country].some(x=>(x||'').toLowerCase().includes(q))}
+function renderHubDrop(){
+  const q=$('hubSearch').value.trim();if(!q){$('hubDrop').classList.remove('open');return}
+  const hits=ORIGINS.filter(o=>DEMAND[o.icao]&&hubMatch(o,q)).slice(0,40);
+  $('hubDrop').innerHTML=hits.map(o=>'<div class="opt" data-icao="'+o.icao+'"><b>'+o.icao+'</b> · '+(o.city||o.name)+' <span style="color:var(--m)">'+esc(o.country)+'</span></div>').join('')||'<div class="opt">—</div>';
+  $('hubDrop').classList.add('open');
+  $('hubDrop').querySelectorAll('[data-icao]').forEach(el=>el.onclick=()=>{
+    const o=ORIGINS.find(x=>x.icao===el.dataset.icao)||BEST.find(x=>x.icao===el.dataset.icao);
+    if(!o)return;
+    if(!SELECTED.some(s=>s.icao===o.icao))SELECTED.push({icao:o.icao,name:o.name,city:o.city||o.name,country:o.country||'',iata:o.iata||''});
+    $('hubSearch').value='';$('hubDrop').classList.remove('open');renderChips();buildDestPool();
+  });
+}
+function renderDestDrop(){
+  const q=$('destSearch').value.trim().toLowerCase();
+  if(!q){$('destDrop').classList.remove('open');return}
+  const pool=DEST_POOL.length?DEST_POOL:Object.values(AIR_BY).slice(0,200).map(a=>({icao:a.icao,name:a.name,city:a.city||a.name,country:a.country}));
+  const hits=pool.filter(o=>[o.icao,o.name,o.city,o.country].some(x=>(x||'').toLowerCase().includes(q))).slice(0,40);
+  $('destDrop').innerHTML=hits.map(o=>'<div class="opt" data-icao="'+o.icao+'"><b>'+o.icao+'</b> · '+(o.city||o.name)+'</div>').join('')||'<div class="opt">—</div>';
+  $('destDrop').classList.add('open');
+  $('destDrop').querySelectorAll('[data-icao]').forEach(el=>el.onclick=()=>{
+    const o=hits.find(x=>x.icao===el.dataset.icao)||AIR_BY[el.dataset.icao];
+    if(!o)return;
+    if(!DEST_FILTER.some(s=>s.icao===o.icao))DEST_FILTER.push({icao:o.icao,name:o.name,city:o.city||o.name,country:o.country||''});
+    $('destSearch').value='';$('destDrop').classList.remove('open');renderChips();
+  });
+}
+$('hubSearch').oninput=renderHubDrop;
+$('destSearch').oninput=renderDestDrop;
+$('hubSearch').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const f=$('hubDrop').querySelector('[data-icao]');if(f)f.click()}};
+$('destSearch').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();const f=$('destDrop').querySelector('[data-icao]');if(f)f.click()}};
+
+function renderBest(){
+  const plane=planeIdx>=0?ALL[planeIdx]:null;
+  const range=plane?plane.range||99999:99999,cap=plane?plane.capacity||300:300,rwyN=plane?+plane.rwy||0:0;
+  const cyc=Math.max(1,+$('cycles').value||10),mkt=(+$('mkt').value||100)/100;
+  const cards=[];
+  for(const h of BEST){
+    const list=(DEMAND[h.icao]||[]).filter(r=>{
+      if(r[3]<5500||r[3]>5999)return false;
+      if(plane&&r[3]>range*1.02)return false;
+      if(plane&&rwyN>0&&(r[6]||0)>0&&(r[6]||0)<rwyN)return false;
+      return true;
+    });
+    if(!list.length)continue;
+    let top=0;for(const r of list)top=Math.max(top,capScore(r[4],r[5],cap,cyc,mkt).score);
+    cards.push({icao:h.icao,name:h.name,country:h.country||'',n:list.length,top});
+  }
+  cards.sort((a,b)=>b.top-a.top||b.n-a.n);
+  $('bestList').innerHTML=cards.slice(0,18).map(h=>'<div class="hub-rec" data-icao="'+h.icao+'"><div class="t">'+esc(h.name)+'</div><div class="s">'+esc(h.country)+' · '+h.icao+'</div><div><span class="badge-n">'+h.n+' routes</span> · Cap '+h.top+'%</div></div>').join('')||'<div class="note">Select aircraft</div>';
+  $('bestList').querySelectorAll('.hub-rec').forEach(el=>el.onclick=()=>{
+    const o=ORIGINS.find(x=>x.icao===el.dataset.icao)||BEST.find(x=>x.icao===el.dataset.icao);
+    if(o&&!SELECTED.some(s=>s.icao===o.icao)){SELECTED.push({icao:o.icao,name:o.name,city:o.city||o.name,country:o.country||''});renderChips();buildDestPool()}
+  });
+}
+
+function doSearch(){
+  if(planeIdx<0){alert(LANG==='es'?'Selecciona avión':'Select aircraft');return}
+  if(!SELECTED.length){alert(LANG==='es'?'Selecciona hub de origen':'Select origin hub');return}
+  const plane=ALL[planeIdx],cap=plane.capacity||300,range=plane.range||99999,rwyN=+plane.rwy||0;
+  const minD=+$('minD').value||0,maxD=+$('maxD').value||99999;
+  const cyc=Math.max(1,+$('cycles').value||10),mkt=Math.min(100,Math.max(1,+$('mkt').value||100))/100;
+  const realism=+$('realism').value===1;
+  const destSet=DEST_FILTER.length?new Set(DEST_FILTER.map(d=>d.icao)):null;
+  const seen=new Set();rows=[];
+  for(const hub of SELECTED){
+    for(const r of(DEMAND[hub.icao]||[])){
+      const km=r[3], dy=r[4]||0, dj=r[5]||0, rwy=r[6]||0, destIcao=r[0];
+      // CHARTER: only weekly Y and J from extract — never F
+      if(km<minD||km>maxD)continue;
+      if(km>range*1.02)continue;
+      if(realism&&rwyN>0&&rwy>0&&rwy<rwyN)continue;
+      if(destSet&&!destSet.has(destIcao))continue;
+      const pk=pairKey(hub.icao,destIcao);if(seen.has(pk))continue;seen.add(pk);
+      const ci=ciVal(km);
+      const h=flightHours(km,speedBase(),ci);
+      const cs=capScore(dy,dj,cap,cyc,mkt);
+      const cd=cdProg(km,ci,realism);
+      const cost=costFlight(km,ci);
+      rows.push({
+        origin:hub.city||hub.name,dest:r[1]||destIcao,pair:hub.icao+'-'+destIcao,km,
+        time:fmtTime(h),capScore:cs.score,y:cs.demY,j:cs.demJ,cfgY:cs.y,cfgJ:cs.j,
+        cdWeek:cd.week,cdCyc:cd.cyc,ticket:ticketsYJ(km,realism),cost:Math.round(cost),rwy,ci,plane:plane.name
+      });
+    }
+  }
+  sortKey='capScore';sortAsc=false;renderTable();
+  $('stats').textContent=plane.name+' · Spd '+Math.round(speedBase())+' · CI '+(+$('ci').value||55)+' · '+rows.length+' routes · Y+J only (no F) · T@5847/CI55='+fmtTime(flightHours(5847,speedBase(),55));
+}
+function renderTable(){
+  rows.sort((a,b)=>{const va=a[sortKey],vb=b[sortKey];if(typeof va==='string')return sortAsc?va.localeCompare(vb):vb.localeCompare(va);return sortAsc?va-vb:vb-va});
+  $('tbody').innerHTML=rows.map(r=>'<tr>'+
+    '<td>'+esc(r.origin)+'</td><td>'+esc(r.dest)+'</td><td>'+esc(r.pair)+'</td><td>'+r.km+'</td><td><b>'+r.time+'</b></td>'+
+    '<td><span class="badge '+grade(r.capScore)+'">'+r.capScore+'%</span></td><td>'+r.y+'</td><td>'+r.j+'</td><td>'+r.cfgY+'</td><td>'+r.cfgJ+'</td>'+
+    '<td><b>'+r.cdWeek+'</b></td><td>'+r.cdCyc+'</td><td>'+esc(r.ticket)+'</td><td>'+money(r.cost)+'</td><td>'+r.rwy+'</td></tr>').join('')
+    ||'<tr><td colspan="15" class="empty">No routes</td></tr>';
+}
+document.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{const k=th.dataset.k;if(sortKey===k)sortAsc=!sortAsc;else{sortKey=k;sortAsc=false}if(rows.length)renderTable()});
+$('btnSearch').onclick=doSearch;
+$('btnCsv').onclick=()=>{
+  if(!rows.length)return;
+  const h=['aircraft','origin','dest','pair','km','time','cap_pct','dem_y','dem_j','cfg_y','cfg_j','cd_week','cd_cycle','ticket','cost','ci','rwy'];
+  const lines=[h.join(',')];
+  rows.forEach(r=>lines.push([r.plane,r.origin,r.dest,r.pair,r.km,r.time,r.capScore,r.y,r.j,r.cfgY,r.cfgJ,r.cdWeek,r.cdCyc,r.ticket,r.cost,r.ci,r.rwy].map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')));
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'}));a.download='garo_charter.csv';a.click();
+};
+$('useTgt').onchange=syncTgt;$('tgtTime').oninput=updateAuto;$('bonus').onchange=()=>{if(planeIdx>=0)showSel();if($('useTgt').checked)updateAuto()};
+$('btnApplyCI').onclick=()=>{updateAuto();$('ci').value=$('ciAuto').value};
+$('cycles').onchange=$('mkt').onchange=()=>renderBest();
+$('btnLang').onclick=()=>{
+  LANG=LANG==='en'?'es':'en';$('btnLang').textContent=LANG==='en'?'ES':'EN';
+  if(LANG==='es'){
+    $('lAc').textContent='Avión';$('lHub').textContent='Hubs origen (multi)';$('lDest').textContent='Hubs destino (multi · filtro opcional)';
+    $('lPar').textContent='Parámetros';$('lN').textContent='# Aviones';$('lCyc').textContent='Ciclos/sem';$('lBonus').textContent='+10% vel';
+    $('lUseTgt').textContent='Tiempo objetivo → CI auto';$('btnSearch').textContent='Buscar rutas';$('lBest').textContent='★ Mejores hubs charter';
+    $('destHint').textContent='Vacío = todos los destinos en rango';
+  }else{
+    $('lAc').textContent='Aircraft';$('lHub').textContent='Origin hubs (multi)';$('lDest').textContent='Destination hubs (multi · optional filter)';
+    $('lPar').textContent='Parameters';$('lN').textContent='# Aircraft';$('lCyc').textContent='Cycles/wk';$('lBonus').textContent='+10% speed';
+    $('lUseTgt').textContent='Target time → auto CI';$('btnSearch').textContent='Search routes';$('lBest').textContent='★ Best charter hubs';
+    $('destHint').textContent='Empty = all destinations in range';
+  }
+};
+
+async function loadAll(){
+  if(location.protocol==='file:'){$('loadMsg').textContent='START_LOCAL.bat → http://127.0.0.1:8501';return}
+  try{
+    const [pl,or,dm,ap,bh]=await Promise.all([
+      fetch('planes.json?v=2').then(r=>r.json()),fetch('origins.json').then(r=>r.json()),
+      fetch('demand.json').then(r=>r.json()),fetch('airports.json').then(r=>r.json()),
+      fetch('best_hubs.json').then(r=>r.json()).catch(()=>[])
+    ]);
+    ALL=pl;ORIGINS=or;DEMAND=dm;BEST=bh||[];
+    AIR_BY={};for(const a of ap)AIR_BY[a.icao]=a;
+    if(window.GARO_AM4&&GARO_AM4.selfTest)console.log('selfTest',GARO_AM4.selfTest());
+    $('loader').style.display='none';
+  }catch(e){$('loadMsg').textContent='Error: '+e.message}
+}
+loadAll();
+</script>
+</body>
+</html>
